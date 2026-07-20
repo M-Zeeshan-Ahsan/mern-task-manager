@@ -7,9 +7,12 @@ import {
   specificTask,
   updateTask,
 } from "../controller/taskController.js";
+import { userLogin, userRegistration } from "../controller/userController.js";
 
 const router = express.Router();
 
+router.post("/signup", userRegistration);
+router.post("/login", userLogin);
 router.get("/tasks", getTasks);
 router.get("/task/:id", specificTask);
 router.post("/create", createTask);
