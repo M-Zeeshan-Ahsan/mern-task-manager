@@ -36,6 +36,7 @@ export const getTasks = async (req, res) => {
   const totalTasks = await collection.countDocuments(filter);
   const result = await collection
     .find(filter)
+    .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit)
     .toArray();
@@ -84,7 +85,8 @@ export const specificTask = async (req, res) => {
 export const createTask = async (req, res) => {
   const db = await connection();
   const collection = await db.collection(collectionName);
-  const result = await collection.insertOne(req.body);
+  const task = { ...req.body, createdAt: new Date() };
+  const result = await collection.insertOne(task);
   if (result) {
     res.send({
       message: "task created successfully",

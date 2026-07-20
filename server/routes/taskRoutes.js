@@ -12,9 +12,9 @@ const router = express.Router();
 
 router.get("/tasks", getTasks);
 router.get("/task/:id", specificTask);
-router.get("/create", createTask);
-router.get("/update", updateTask);
-router.get("/delete", deleteTask);
-router.get("/delete-multiple", deleteMultipleTask);
+router.post("/create", createTask);
+router.put("/update", updateTask);
+router.delete("/delete", deleteTask);
+router.delete("/delete-multiple", deleteMultipleTask);
 
 export default router;
