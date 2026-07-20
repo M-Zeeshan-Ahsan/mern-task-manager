@@ -83,6 +83,14 @@ export const specificTask = async (req, res) => {
 };
 
 export const createTask = async (req, res) => {
+  const { title, description } = req.body;
+  if (!title || !description) {
+    return res.send({
+      success: false,
+      message: "Title and Description are required",
+      data: null,
+    });
+  }
   const db = await connection();
   const collection = await db.collection(collectionName);
   const task = { ...req.body, createdAt: new Date() };
