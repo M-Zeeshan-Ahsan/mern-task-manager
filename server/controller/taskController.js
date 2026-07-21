@@ -93,7 +93,12 @@ export const createTask = async (req, res) => {
   }
   const db = await connection();
   const collection = await db.collection(collectionName);
-  const task = { ...req.body, createdAt: new Date() };
+  const task = {
+    title,
+    description,
+    image: req.file ? req.file.filename : null,
+    createdAt: new Date(),
+  };
   const result = await collection.insertOne(task);
   if (result) {
     res.send({
