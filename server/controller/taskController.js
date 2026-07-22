@@ -83,7 +83,7 @@ export const specificTask = async (req, res) => {
 };
 
 export const createTask = async (req, res) => {
-  const { title, description } = req.body;
+  const { title, description, image } = req.body;
   if (!title || !description) {
     return res.send({
       success: false,
@@ -96,7 +96,7 @@ export const createTask = async (req, res) => {
   const task = {
     title,
     description,
-    image: req.file ? req.file.filename : null,
+    image,
     createdAt: new Date(),
   };
   const result = await collection.insertOne(task);
