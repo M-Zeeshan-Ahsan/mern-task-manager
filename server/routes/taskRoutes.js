@@ -20,7 +20,7 @@ router.get("/task/:id", specificTask);
 router.post("/upload", upload.single("image"), uploadImage);
 router.post("/create", createTask);
 router.put("/update", updateTask);
-router.delete("/delete", deleteTask);
+router.delete("/delete/:id", deleteTask);
 router.delete("/delete-multiple", deleteMultipleTask);
 
 export default router;
