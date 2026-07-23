@@ -10,6 +10,7 @@ import {
 import { userLogin, userRegistration } from "../controller/userController.js";
 import upload from "../middleware/upload.js";
 import { uploadImage } from "../controller/uploadController.js";
+import verifyToken from "../middleware/verifyToken.js";
 
 const router = express.Router();
 
@@ -60,7 +61,7 @@ router.post("/signup", userRegistration);
  *                 example: zeeshan@gmail.com
  *               password:
  *                 type: string
- *                 example: 123456
+ *                 example: 12345
  *     responses:
  *       200:
  *         description: User logged in successfully
@@ -99,6 +100,8 @@ router.post("/login", userLogin);
  *         schema:
  *           type: string
  *         description: Search by title or description
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Tasks fetched successfully
@@ -106,7 +109,7 @@ router.post("/login", userLogin);
  *         description: Internal server error
  */
 
-router.get("/tasks", getTasks);
+router.get("/tasks", verifyToken, getTasks);
 /**
  * @swagger
  * /task/{id}:
@@ -129,7 +132,7 @@ router.get("/tasks", getTasks);
  *       500:
  *         description: Internal server error
  */
-router.get("/task/:id", specificTask);
+router.get("/task/:id", verifyToken, specificTask);
 /**
  * @swagger
  * /upload:
@@ -194,7 +197,7 @@ router.post("/upload", upload.single("image"), uploadImage);
  *         description: Internal server error
  */
 
-router.post("/create", createTask);
+router.post("/create", verifyToken, createTask);
 /**
  * @swagger
  * /update:
@@ -235,7 +238,7 @@ router.post("/create", createTask);
  *       500:
  *         description: Internal server error
  */
-router.put("/update", updateTask);
+router.put("/update", verifyToken, updateTask);
 /**
  * @swagger
  * /delete/{id}:
@@ -260,7 +263,7 @@ router.put("/update", updateTask);
  *       500:
  *         description: Internal server error
  */
-router.delete("/delete/:id", deleteTask);
+router.delete("/delete/:id", verifyToken, deleteTask);
 /**
  * @swagger
  * /delete-multiple:
@@ -292,6 +295,6 @@ router.delete("/delete/:id", deleteTask);
  *       500:
  *         description: Internal server error
  */
-router.delete("/delete-multiple", deleteMultipleTask);
+router.delete("/delete-multiple", verifyToken, deleteMultipleTask);
 
 export default router;

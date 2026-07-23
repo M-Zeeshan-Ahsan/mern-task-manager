@@ -1,18 +1,22 @@
 import jwt from "jsonwebtoken";
 
 const verifyToken = (req, res, next) => {
-  const token = req.headers.authorization;
+  const authHeader = req.headers.authorization;
 
-  if (!token) {
-    return res.send({
+  if (!authHeader) {
+    return res.status(401).json({
       success: false,
       message: "Token required",
     });
   }
 
-  jwt.verify(token, "Google", (err, decoded) => {
+  const token = authHeader.startsWith("Bearer ")
+    ? authHeader.split(" ")[1]
+    : authHeader;
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) {
-      return res.send({
+      return res.status(401).json({
         success: false,
         message: "Invalid token",
       });

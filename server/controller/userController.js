@@ -13,7 +13,15 @@ export const userRegistration = async (req, res) => {
         data: null,
       });
     }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a valid email address",
+        data: null,
+      });
+    }
     const db = await connection();
     const collection = await db.collection("users");
     const existingUser = await collection.findOne({ email });
@@ -64,7 +72,15 @@ export const userLogin = async (req, res) => {
         data: null,
       });
     }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a valid email address",
+        data: null,
+      });
+    }
     const db = await connection();
     const collection = db.collection("users");
     const user = await collection.findOne({ email });
