@@ -124,6 +124,8 @@ router.get("/tasks", verifyToken, getTasks);
  *         schema:
  *           type: string
  *         description: Task ID
+ *  security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Task fetched successfully
@@ -169,6 +171,8 @@ router.post("/upload", upload.single("image"), uploadImage);
  *     summary: Create a new task
  *     tags:
  *       - Tasks
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -228,6 +232,8 @@ router.post("/create", verifyToken, createTask);
  *               image:
  *                 type: string
  *                 example: string
+ *  security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Task updated successfully
@@ -246,6 +252,8 @@ router.put("/update", verifyToken, updateTask);
  *     summary: Delete a task by id
  *     tags:
  *       - Tasks
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -271,6 +279,8 @@ router.delete("/delete/:id", verifyToken, deleteTask);
  *     summary: Delete multiple tasks
  *     tags:
  *       - Tasks
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:

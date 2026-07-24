@@ -1,5 +1,11 @@
 import { ObjectId } from "mongodb";
 import { collectionName, connection } from "../dbconfig.js";
+import {
+  createTaskSchema,
+  updateTaskSchema,
+  taskIdSchema,
+  deleteMultipleTaskSchema,
+} from "../validation/taskValidation.js";
 
 export const getTasks = async (req, res, next) => {
   try {
@@ -105,14 +111,7 @@ export const specificTask = async (req, res, next) => {
 export const createTask = async (req, res, next) => {
   try {
     const { title, description, image } = req.body;
-
-    if (!title || !description || !image) {
-      return res.status(400).json({
-        success: false,
-        message: "Title, Image and Description are required",
-        data: null,
-      });
-    }
+    createTaskSchema.parse(req.body);
 
     const db = await connection();
     const collection = db.collection(collectionName);
@@ -146,24 +145,8 @@ export const createTask = async (req, res, next) => {
 
 export const updateTask = async (req, res, next) => {
   try {
+    updateTaskSchema.parse(req.body);
     const { _id, title, description, image } = req.body;
-
-    if (!_id) {
-      return res.status(400).json({
-        success: false,
-        message: "Task id is required",
-        data: null,
-      });
-    }
-
-    if (!title && !description && !image) {
-      return res.status(400).json({
-        success: false,
-        message: "At least one field is required to update",
-        data: null,
-      });
-    }
-
     const db = await connection();
     const collection = db.collection(collectionName);
 
@@ -202,15 +185,8 @@ export const updateTask = async (req, res, next) => {
 
 export const deleteTask = async (req, res, next) => {
   try {
+    taskIdSchema.parse(req.params);
     const id = req.params.id;
-
-    if (!id) {
-      return res.status(400).json({
-        success: false,
-        message: "Task id is required",
-        data: null,
-      });
-    }
 
     const db = await connection();
     const collection = db.collection(collectionName);
@@ -239,14 +215,8 @@ export const deleteTask = async (req, res, next) => {
 
 export const deleteMultipleTask = async (req, res, next) => {
   try {
+    deleteMultipleTaskSchema.parse(req.body);
     const { ids } = req.body;
-    if (!ids || !Array.isArray(ids) || ids.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Task ids are required",
-        data: null,
-      });
-    }
 
     const db = await connection();
     const collection = db.collection(collectionName);

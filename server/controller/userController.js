@@ -2,26 +2,15 @@ import { ObjectId } from "mongodb";
 import { collectionName, connection } from "../dbconfig.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import {
+  registrationSchema,
+  loginSchema,
+} from "../validation/userValidation.js";
 
-export const userRegistration = async (req, res) => {
+export const userRegistration = async (req, res, next) => {
   try {
+    registrationSchema.parse(req.body);
     const { name, email, password } = req.body;
-    if (!name || !email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "name, email and password required",
-        data: null,
-      });
-    }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({
-        success: false,
-        message: "Please enter a valid email address",
-        data: null,
-      });
-    }
     const db = await connection();
     const collection = await db.collection("users");
     const existingUser = await collection.findOne({ email });
@@ -54,33 +43,15 @@ export const userRegistration = async (req, res) => {
       data: null,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Something went wrong, please try again later",
-      error: error.message,
-    });
+    next(error);
   }
 };
 
-export const userLogin = async (req, res) => {
+export const userLogin = async (req, res, next) => {
   try {
+    loginSchema.parse(req.body);
     const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "Email and password are required",
-        data: null,
-      });
-    }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({
-        success: false,
-        message: "Please enter a valid email address",
-        data: null,
-      });
-    }
     const db = await connection();
     const collection = db.collection("users");
     const user = await collection.findOne({ email });
@@ -123,10 +94,6 @@ export const userLogin = async (req, res) => {
       },
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Something went wrong, please try again later",
-      error: error.message,
-    });
+    next(error);
   }
 };
