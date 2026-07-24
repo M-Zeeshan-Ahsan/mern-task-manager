@@ -11,6 +11,11 @@ import { userLogin, userRegistration } from "../controller/userController.js";
 import upload from "../middleware/upload.js";
 import { uploadImage } from "../controller/uploadController.js";
 import verifyToken from "../middleware/verifyToken.js";
+import validate from "../middleware/validate.js";
+import {
+  loginSchema,
+  registrationSchema,
+} from "../validation/userValidation.js";
 
 const router = express.Router();
 
@@ -38,7 +43,7 @@ const router = express.Router();
  *       201:
  *         description: User created successfully
  */
-router.post("/signup", userRegistration);
+router.post("/signup", validate(registrationSchema), userRegistration);
 /**
  * @swagger
  * /login:
@@ -74,7 +79,7 @@ router.post("/signup", userRegistration);
  *       500:
  *         description: Internal server error
  */
-router.post("/login", userLogin);
+router.post("/login", validate(loginSchema), userLogin);
 /**
  * @swagger
  * /tasks:

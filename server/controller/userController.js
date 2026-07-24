@@ -9,7 +9,6 @@ import {
 
 export const userRegistration = async (req, res, next) => {
   try {
-    registrationSchema.parse(req.body);
     const { name, email, password } = req.body;
     const db = await connection();
     const collection = await db.collection("users");
@@ -49,7 +48,6 @@ export const userRegistration = async (req, res, next) => {
 
 export const userLogin = async (req, res, next) => {
   try {
-    loginSchema.parse(req.body);
     const { email, password } = req.body;
 
     const db = await connection();
