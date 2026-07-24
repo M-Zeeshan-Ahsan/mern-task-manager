@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb";
 import { collectionName, connection } from "../dbconfig.js";
 
-export const getTasks = async (req, res) => {
+export const getTasks = async (req, res, next) => {
   try {
     const db = await connection();
     const collection = await db.collection(collectionName);
@@ -61,15 +61,11 @@ export const getTasks = async (req, res) => {
       },
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Something went wrong, try again later",
-      error: error.message,
-    });
+    next(error);
   }
 };
 
-export const specificTask = async (req, res) => {
+export const specificTask = async (req, res, next) => {
   try {
     const id = req.params.id;
 
@@ -102,17 +98,11 @@ export const specificTask = async (req, res) => {
       data: result,
     });
   } catch (error) {
-    console.log(error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Something went wrong, try again later",
-      error: error.message,
-    });
+    next(error);
   }
 };
 
-export const createTask = async (req, res) => {
+export const createTask = async (req, res, next) => {
   try {
     const { title, description, image } = req.body;
 
@@ -150,15 +140,11 @@ export const createTask = async (req, res) => {
       data: null,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Something went wrong, try again later",
-      error: error.message,
-    });
+    next(error);
   }
 };
 
-export const updateTask = async (req, res) => {
+export const updateTask = async (req, res, next) => {
   try {
     const { _id, title, description, image } = req.body;
 
@@ -210,15 +196,11 @@ export const updateTask = async (req, res) => {
       data: result,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Something went wrong, try again later",
-      error: error.message,
-    });
+    next(error);
   }
 };
 
-export const deleteTask = async (req, res) => {
+export const deleteTask = async (req, res, next) => {
   try {
     const id = req.params.id;
 
@@ -251,15 +233,11 @@ export const deleteTask = async (req, res) => {
       data: result,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Something went wrong, try again later",
-      error: error.message,
-    });
+    next(error);
   }
 };
 
-export const deleteMultipleTask = async (req, res) => {
+export const deleteMultipleTask = async (req, res, next) => {
   try {
     const { ids } = req.body;
     if (!ids || !Array.isArray(ids) || ids.length === 0) {
@@ -295,10 +273,6 @@ export const deleteMultipleTask = async (req, res) => {
       data: result,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Something went wrong, try again later",
-      error: error.message,
-    });
+    next(error);
   }
 };
