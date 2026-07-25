@@ -7,6 +7,7 @@ import swaggerSpec from "./config/swagger.js";
 import errorHandler from "./middleware/errorHandler.js";
 import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
+import morgan from "morgan";
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -17,6 +18,7 @@ const limiter = rateLimit({
 const app = express();
 app.use(helmet());
 app.use(limiter);
+app.use(morgan("dev"));
 app.use(express.json());
 app.use(cors());
 app.use(
