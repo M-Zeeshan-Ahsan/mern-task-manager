@@ -16,6 +16,12 @@ import {
   loginSchema,
   registrationSchema,
 } from "../validation/userValidation.js";
+import {
+  createTaskSchema,
+  deleteMultipleTaskSchema,
+  taskIdSchema,
+  updateTaskSchema,
+} from "../validation/taskValidation.js";
 
 const router = express.Router();
 
@@ -139,7 +145,12 @@ router.get("/tasks", verifyToken, getTasks);
  *       500:
  *         description: Internal server error
  */
-router.get("/task/:id", verifyToken, specificTask);
+router.get(
+  "/task/:id",
+  verifyToken,
+  validate(taskIdSchema, "params"),
+  specificTask,
+);
 /**
  * @swagger
  * /upload:
@@ -206,7 +217,7 @@ router.post("/upload", upload.single("image"), uploadImage);
  *         description: Internal server error
  */
 
-router.post("/create", verifyToken, createTask);
+router.post("/create", verifyToken, validate(createTaskSchema), createTask);
 /**
  * @swagger
  * /update:
@@ -249,7 +260,7 @@ router.post("/create", verifyToken, createTask);
  *       500:
  *         description: Internal server error
  */
-router.put("/update", verifyToken, updateTask);
+router.put("/update", verifyToken, validate(updateTaskSchema), updateTask);
 /**
  * @swagger
  * /delete/{id}:
@@ -276,7 +287,12 @@ router.put("/update", verifyToken, updateTask);
  *       500:
  *         description: Internal server error
  */
-router.delete("/delete/:id", verifyToken, deleteTask);
+router.delete(
+  "/delete/:id",
+  verifyToken,
+  validate(taskIdSchema, "params"),
+  deleteTask,
+);
 /**
  * @swagger
  * /delete-multiple:
@@ -310,6 +326,11 @@ router.delete("/delete/:id", verifyToken, deleteTask);
  *       500:
  *         description: Internal server error
  */
-router.delete("/delete-multiple", verifyToken, deleteMultipleTask);
+router.delete(
+  "/delete-multiple",
+  verifyToken,
+  validate(deleteMultipleTaskSchema),
+  deleteMultipleTask,
+);
 
 export default router;

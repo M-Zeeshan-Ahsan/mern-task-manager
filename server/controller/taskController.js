@@ -185,7 +185,6 @@ export const updateTask = async (req, res, next) => {
 
 export const deleteTask = async (req, res, next) => {
   try {
-    taskIdSchema.parse(req.params);
     const id = req.params.id;
 
     const db = await connection();
