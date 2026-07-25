@@ -5,10 +5,25 @@ import taskRoutes from "./routes/taskRoutes.js";
 import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./config/swagger.js";
 import errorHandler from "./middleware/errorHandler.js";
+import helmet from "helmet";
+import { rateLimit } from "express-rate-limit";
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: "Too many requests, please try again later.",
+});
 
 const app = express();
+app.use(helmet());
+app.use(limiter);
 app.use(express.json());
 app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+  }),
+);
 app.use("/uploads", express.static("uploads"));
 app.use(taskRoutes);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));

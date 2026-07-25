@@ -23,9 +23,15 @@ import {
   updateTaskSchema,
 } from "../validation/taskValidation.js";
 import asyncHandler from "../middleware/asyncHandler.js";
+import { rateLimit } from "express-rate-limit";
 
 const router = express.Router();
 
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: "Too many login attempts, try again later",
+});
 /**
  * @swagger
  * /signup:
@@ -90,7 +96,7 @@ router.post(
  *       500:
  *         description: Internal server error
  */
-router.post("/login", validate(loginSchema), userLogin);
+router.post("/login", loginLimiter, validate(loginSchema), userLogin);
 /**
  * @swagger
  * /tasks:
