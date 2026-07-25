@@ -7,6 +7,10 @@ import {
   loginSchema,
 } from "../validation/userValidation.js";
 import ApiError from "../middleware/ApiError.js";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+} from "../utils/generateToken.js";
 
 export const userRegistration = async (req, res, next) => {
   const { name, email, password } = req.body;
@@ -51,21 +55,23 @@ export const userLogin = async (req, res, next) => {
       throw new ApiError(404, "Invalid email or password");
     }
 
-    const token = jwt.sign(
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
+    await collection.updateOne(
       {
-        id: user._id,
-        email: user.email,
+        _id: user._id,
       },
-      process.env.JWT_SECRET,
       {
-        expiresIn: "2d",
+        $set: {
+          refreshToken,
+        },
       },
     );
-
     return res.status(200).json({
       success: true,
       message: "User logged in successfully",
-      token,
+      accessToken,
+      refreshToken,
       data: {
         id: user._id,
         email: user.email,
@@ -74,4 +80,48 @@ export const userLogin = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+export const refreshToken = async (req, res) => {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    throw new ApiError(401, "Refresh token is required");
+  }
+
+  const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+
+  const db = await connection();
+  const collection = db.collection("users");
+
+  const user = await collection.findOne({
+    _id: decoded.id,
+  });
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  if (user.refreshToken !== refreshToken) {
+    throw new ApiError(401, "Invalid refresh token");
+  }
+
+  const accessToken = generateAccessToken(user);
+  const newRefreshToken = generateRefreshToken(user);
+
+  await collection.updateOne(
+    { _id: user._id },
+    {
+      $set: {
+        refreshToken: newRefreshToken,
+      },
+    },
+  );
+
+  return res.status(200).json({
+    success: true,
+    message: "Tokens refreshed successfully",
+    accessToken,
+    refreshToken: newRefreshToken,
+  });
 };

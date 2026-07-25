@@ -23,80 +23,9 @@ import {
   updateTaskSchema,
 } from "../validation/taskValidation.js";
 import asyncHandler from "../middleware/asyncHandler.js";
-import { rateLimit } from "express-rate-limit";
 
 const router = express.Router();
 
-const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 5,
-  message: "Too many login attempts, try again later",
-});
-/**
- * @swagger
- * /signup:
- *   post:
- *     summary: Register a new user
- *     tags:
- *       - Users
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               email:
- *                 type: string
- *               password:
- *                 type: string
- *     responses:
- *       201:
- *         description: User created successfully
- */
-router.post(
-  "/signup",
-  validate(registrationSchema),
-  asyncHandler(userRegistration),
-);
-/**
- * @swagger
- * /login:
- *   post:
- *     summary: Login user
- *     tags:
- *       - Users
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - email
- *               - password
- *             properties:
- *               email:
- *                 type: string
- *                 example: zeeshan@gmail.com
- *               password:
- *                 type: string
- *                 example: 12345
- *     responses:
- *       200:
- *         description: User logged in successfully
- *       400:
- *         description: Email and password are required
- *       401:
- *         description: Invalid email or password
- *       404:
- *         description: User not found
- *       500:
- *         description: Internal server error
- */
-router.post("/login", loginLimiter, validate(loginSchema), userLogin);
 /**
  * @swagger
  * /tasks:

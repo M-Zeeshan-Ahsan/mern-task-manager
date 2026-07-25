@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import { ObjectId } from "mongodb";
+import authRoutes from "./routes/authRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js";
 import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./config/swagger.js";
@@ -21,12 +22,13 @@ app.use(limiter);
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(cors());
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-  }),
-);
+// app.use(
+//   cors({
+//     origin: "http://localhost:5173",
+//   }),
+// );
 app.use("/uploads", express.static("uploads"));
+app.use(authRoutes);
 app.use(taskRoutes);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(errorHandler);

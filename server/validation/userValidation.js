@@ -13,3 +13,7 @@ export const loginSchema = z.object({
 
   password: z.string().min(5, "Password must be at least 5 characters"),
 });
+
+export const refreshTokenSchema = z.object({
+  refreshToken: z.string().min(1, "Refresh token is required"),
+});
