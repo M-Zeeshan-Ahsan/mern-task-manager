@@ -13,7 +13,10 @@ export const getTasks = async (req, res, next) => {
     const collection = await db.collection(collectionName);
     const id = req.query.id;
     if (id) {
-      const task = await collection.findOne({ _id: new ObjectId(id) });
+      const task = await collection.findOne({
+        _id: new ObjectId(id),
+        userId: req.user.id,
+      });
       if (!task) {
         return res.status(404).json({
           success: false,
@@ -29,6 +32,7 @@ export const getTasks = async (req, res, next) => {
     }
     const search = req.query.search || "";
     const filter = {
+      userId: req.user.id,
       $or: [
         {
           title: {
@@ -88,6 +92,7 @@ export const specificTask = async (req, res, next) => {
 
     const result = await collection.findOne({
       _id: new ObjectId(id),
+      userId: req.user.id,
     });
 
     if (!result) {
@@ -111,7 +116,6 @@ export const specificTask = async (req, res, next) => {
 export const createTask = async (req, res, next) => {
   try {
     const { title, description, image } = req.body;
-    createTaskSchema.parse(req.body);
 
     const db = await connection();
     const collection = db.collection(collectionName);
@@ -120,6 +124,7 @@ export const createTask = async (req, res, next) => {
       title,
       description,
       image,
+      userId: req.user.id,
       createdAt: new Date(),
     };
 
@@ -159,6 +164,7 @@ export const updateTask = async (req, res, next) => {
     const result = await collection.updateOne(
       {
         _id: new ObjectId(_id),
+        userId: req.user.id,
       },
       {
         $set: fields,
@@ -192,6 +198,7 @@ export const deleteTask = async (req, res, next) => {
 
     const result = await collection.deleteOne({
       _id: new ObjectId(id),
+      userId: req.user.id,
     });
 
     if (result.deletedCount === 0) {
@@ -226,6 +233,7 @@ export const deleteMultipleTask = async (req, res, next) => {
       _id: {
         $in: selectedTasks,
       },
+      userId: req.user.id,
     });
 
     if (result.deletedCount === 0) {
