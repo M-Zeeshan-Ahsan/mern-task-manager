@@ -22,6 +22,7 @@ import {
   taskIdSchema,
   updateTaskSchema,
 } from "../validation/taskValidation.js";
+import asyncHandler from "../middleware/asyncHandler.js";
 
 const router = express.Router();
 
@@ -49,7 +50,11 @@ const router = express.Router();
  *       201:
  *         description: User created successfully
  */
-router.post("/signup", validate(registrationSchema), userRegistration);
+router.post(
+  "/signup",
+  validate(registrationSchema),
+  asyncHandler(userRegistration),
+);
 /**
  * @swagger
  * /login:

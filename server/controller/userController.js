@@ -8,42 +8,38 @@ import {
 } from "../validation/userValidation.js";
 
 export const userRegistration = async (req, res, next) => {
-  try {
-    const { name, email, password } = req.body;
-    const db = await connection();
-    const collection = await db.collection("users");
-    const existingUser = await collection.findOne({ email });
-    if (existingUser) {
-      return res.status(409).json({
-        success: false,
-        message: "Email already exists",
-        data: null,
-      });
-    }
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = {
-      name,
-      email,
-      password: hashedPassword,
-      createdAt: new Date(),
-    };
-    const result = await collection.insertOne(user);
-    if (result.insertedId) {
-      return res.status(201).json({
-        success: true,
-        message: "user created successfully",
-        data: result,
-      });
-    }
-
-    return res.status(400).json({
+  const { name, email, password } = req.body;
+  const db = await connection();
+  const collection = await db.collection("users");
+  const existingUser = await collection.findOne({ email });
+  if (existingUser) {
+    return res.status(409).json({
       success: false,
-      message: "user not created",
+      message: "Email already exists",
       data: null,
     });
-  } catch (error) {
-    next(error);
   }
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const user = {
+    name,
+    email,
+    password: hashedPassword,
+    createdAt: new Date(),
+  };
+  const result = await collection.insertOne(user);
+  if (result.insertedId) {
+    return res.status(201).json({
+      success: true,
+      message: "user created successfully",
+      data: result,
+    });
+  }
+
+  return res.status(400).json({
+    success: false,
+    message: "user not created",
+    data: null,
+  });
 };
 
 export const userLogin = async (req, res, next) => {
