@@ -6,6 +6,7 @@ import {
   registrationSchema,
   loginSchema,
 } from "../validation/userValidation.js";
+import ApiError from "../middleware/ApiError.js";
 
 export const userRegistration = async (req, res, next) => {
   const { name, email, password } = req.body;
@@ -13,11 +14,7 @@ export const userRegistration = async (req, res, next) => {
   const collection = await db.collection("users");
   const existingUser = await collection.findOne({ email });
   if (existingUser) {
-    return res.status(409).json({
-      success: false,
-      message: "Email already exists",
-      data: null,
-    });
+    throw new ApiError(409, "Email already exists");
   }
   const hashedPassword = await bcrypt.hash(password, 10);
   const user = {
@@ -34,12 +31,7 @@ export const userRegistration = async (req, res, next) => {
       data: result,
     });
   }
-
-  return res.status(400).json({
-    success: false,
-    message: "user not created",
-    data: null,
-  });
+  throw new ApiError(400, "User not created");
 };
 
 export const userLogin = async (req, res, next) => {
@@ -51,20 +43,12 @@ export const userLogin = async (req, res, next) => {
     const user = await collection.findOne({ email });
 
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-        data: null,
-      });
+      throw new ApiError(404, "User not found");
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid email or password",
-        data: null,
-      });
+      throw new ApiError(404, "Invalid email or password");
     }
 
     const token = jwt.sign(
