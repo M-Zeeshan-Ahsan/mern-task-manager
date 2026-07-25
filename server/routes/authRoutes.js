@@ -96,7 +96,7 @@ router.post("/login", loginLimiter, validate(loginSchema), userLogin);
 
 /**
  * @swagger
- * /api/auth/refresh-token:
+ * /refresh-token:
  *   post:
  *     summary: Generate new access token using refresh token
  *     tags:

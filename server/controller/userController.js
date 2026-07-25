@@ -95,7 +95,7 @@ export const refreshToken = async (req, res) => {
   const collection = db.collection("users");
 
   const user = await collection.findOne({
-    _id: decoded.id,
+    _id: new ObjectId(decoded.id),
   });
 
   if (!user) {
