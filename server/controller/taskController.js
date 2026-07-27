@@ -118,8 +118,8 @@ export const createTask = async (req, res, next) => {
     const { title, description, image } = req.body;
 
     const db = await connection();
-    const collection = db.collection(collectionName);
-    console.log("req", req.user);
+    const collection = await db.collection(collectionName);
+
     const task = {
       title,
       description,

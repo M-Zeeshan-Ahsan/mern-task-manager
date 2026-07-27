@@ -3,6 +3,7 @@ import cors from "cors";
 import { ObjectId } from "mongodb";
 import authRoutes from "./routes/authRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js";
+import categoryRoutes from "./routes/categoryRoutes.js";
 import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./config/swagger.js";
 import errorHandler from "./middleware/errorHandler.js";
@@ -30,6 +31,7 @@ app.use(cors());
 app.use("/uploads", express.static("uploads"));
 app.use(authRoutes);
 app.use(taskRoutes);
+app.use(categoryRoutes);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(errorHandler);
 

@@ -20,7 +20,7 @@ const router = express.Router();
 
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 5,
+  max: 15,
   message: "Too many login attempts, try again later",
 });
 
