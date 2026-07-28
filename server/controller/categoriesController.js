@@ -42,7 +42,16 @@ export const getCategory = async (req, res, next) => {
   try {
     const db = await connection();
     const collection = await db.collection(categoryCollectionName);
-    const result = await collection.find({ userId: req.user.id }).toArray();
+    // const result = await collection.find({ userId: req.user.id }).toArray();
+    const result = await collection
+      .aggregate([
+        {
+          $match: {
+            userId: req.user.id,
+          },
+        },
+      ])
+      .toArray();
     if (result) {
       return res.status(200).json({
         success: true,

@@ -14,21 +14,43 @@ export const getTasks = async (req, res, next) => {
     const collection = await db.collection(collectionName);
     const id = req.query.id;
     if (id) {
-      const task = await collection.findOne({
-        _id: new ObjectId(id),
-        userId: req.user.id,
-      });
-      if (!task) {
-        return res.status(404).json({
-          success: false,
-          message: "Task not found",
-          data: null,
-        });
+      if (!ObjectId.isValid(id)) {
+        throw new ApiError(400, "Invalid task id");
       }
+
+      const task = await collection
+        .aggregate([
+          {
+            $match: {
+              _id: new ObjectId(id),
+              userId: req.user.id,
+            },
+          },
+          {
+            $lookup: {
+              from: "categories",
+              localField: "categoryId",
+              foreignField: "_id",
+              as: "category",
+            },
+          },
+          {
+            $unwind: {
+              path: "$category",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+        ])
+        .toArray();
+
+      if (task.length === 0) {
+        throw new ApiError(404, "Task not found");
+      }
+
       return res.status(200).json({
         success: true,
         message: "Task fetched successfully",
-        data: task,
+        data: task[0],
       });
     }
     const search = req.query.search || "";
@@ -53,11 +75,43 @@ export const getTasks = async (req, res, next) => {
     const limit = Number(req.query.limit) || 5;
     const skip = (page - 1) * limit;
     const totalTasks = await collection.countDocuments(filter);
+    // const result = await collection
+    //   .find(filter)
+    //   .sort({ createdAt: -1 })
+    //   .skip(skip)
+    //   .limit(limit)
+    //   .toArray();
     const result = await collection
-      .find(filter)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
+      .aggregate([
+        {
+          $match: filter,
+        },
+        {
+          $lookup: {
+            from: "categories",
+            localField: "categoryId",
+            foreignField: "_id",
+            as: "category",
+          },
+        },
+        {
+          $unwind: {
+            path: "$category",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $sort: {
+            createdAt: -1,
+          },
+        },
+        {
+          $skip: skip,
+        },
+        {
+          $limit: limit,
+        },
+      ])
       .toArray();
 
     return res.status(200).json({
@@ -91,10 +145,33 @@ export const specificTask = async (req, res, next) => {
     const db = await connection();
     const collection = db.collection(collectionName);
 
-    const result = await collection.findOne({
-      _id: new ObjectId(id),
-      userId: req.user.id,
-    });
+    // const result = await collection.findOne({
+    //   _id: new ObjectId(id),
+    //   userId: req.user.id,
+    // });
+    const result = await collection
+      .aggregate([
+        {
+          $match: {
+            _id: new ObjectId(id),
+            userId: req.user.id,
+          },
+        },
+        {
+          $lookup: {
+            from: "categories",
+            localField: "categoryId",
+            foreignField: "_id",
+            as: "category",
+          },
+        },
+        {
+          $unwind: {
+            path: "$category",
+          },
+        },
+      ])
+      .toArray();
 
     if (!result) {
       return res.status(404).json({
@@ -107,7 +184,7 @@ export const specificTask = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       message: "Task fetched successfully",
-      data: result,
+      data: result[0],
     });
   } catch (error) {
     next(error);
