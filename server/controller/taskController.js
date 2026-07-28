@@ -106,6 +106,7 @@ export const getTasks = async (req, res, next) => {
             description: 1,
             image: 1,
             createdAt: 1,
+            status: 1,
             "category._id": 1,
             "category.name": 1,
           },
@@ -223,6 +224,7 @@ export const createTask = async (req, res, next) => {
       title,
       description,
       image,
+      status: "pending",
       categoryId: new ObjectId(categoryId),
       userId: req.user.id,
       createdAt: new Date(),
@@ -349,6 +351,43 @@ export const deleteMultipleTask = async (req, res, next) => {
       success: true,
       message: "Tasks deleted successfully",
       data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateTaskStatus = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!ObjectId.isValid(id)) {
+      throw new ApiError(400, "Invalid task id");
+    }
+
+    const db = await connection();
+    const collection = db.collection(collectionName);
+
+    const result = await collection.updateOne(
+      {
+        _id: new ObjectId(id),
+        userId: req.user.id,
+      },
+      {
+        $set: {
+          status,
+        },
+      },
+    );
+
+    if (result.matchedCount === 0) {
+      throw new ApiError(404, "Task not found");
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Task status updated successfully",
     });
   } catch (error) {
     next(error);

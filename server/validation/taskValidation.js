@@ -46,3 +46,9 @@ export const deleteMultipleTaskSchema = z.object({
     .array(z.string().length(24, "Invalid Task ID"))
     .min(1, "At least one task id is required"),
 });
+
+export const updateTaskStatusSchema = z.object({
+  status: z.enum(["pending", "completed"], {
+    error: "Status must be either pending or completed",
+  }),
+});

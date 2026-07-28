@@ -6,6 +6,7 @@ import {
   getTasks,
   specificTask,
   updateTask,
+  updateTaskStatus,
 } from "../controller/taskController.js";
 import { userLogin, userRegistration } from "../controller/userController.js";
 import upload from "../middleware/upload.js";
@@ -21,6 +22,7 @@ import {
   deleteMultipleTaskSchema,
   taskIdSchema,
   updateTaskSchema,
+  updateTaskStatusSchema,
 } from "../validation/taskValidation.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 
@@ -271,6 +273,13 @@ router.delete(
   verifyToken,
   validate(deleteMultipleTaskSchema),
   deleteMultipleTask,
+);
+router.patch(
+  "/task-status/:id",
+  verifyToken,
+  validate(taskIdSchema, "params"),
+  validate(updateTaskStatusSchema),
+  updateTaskStatus,
 );
 
 export default router;
