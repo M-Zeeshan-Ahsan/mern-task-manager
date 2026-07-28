@@ -6,6 +6,7 @@ import {
   taskIdSchema,
   deleteMultipleTaskSchema,
 } from "../validation/taskValidation.js";
+import ApiError from "../middleware/ApiError.js";
 
 export const getTasks = async (req, res, next) => {
   try {
@@ -115,15 +116,27 @@ export const specificTask = async (req, res, next) => {
 
 export const createTask = async (req, res, next) => {
   try {
-    const { title, description, image } = req.body;
+    const { title, description, image, categoryId } = req.body;
 
     const db = await connection();
     const collection = await db.collection(collectionName);
+    const categoryCollection = db.collection("categories");
+    if (!ObjectId.isValid(categoryId)) {
+      throw new ApiError(400, "Invalid category id");
+    }
+    const category = await categoryCollection.findOne({
+      _id: new ObjectId(categoryId),
+      userId: req.user.id,
+    });
 
+    if (!category) {
+      throw new ApiError(404, "Category not found");
+    }
     const task = {
       title,
       description,
       image,
+      categoryId: new ObjectId(categoryId),
       userId: req.user.id,
       createdAt: new Date(),
     };
@@ -151,7 +164,7 @@ export const createTask = async (req, res, next) => {
 export const updateTask = async (req, res, next) => {
   try {
     updateTaskSchema.parse(req.body);
-    const { _id, title, description, image } = req.body;
+    const { _id, title, description, image, categoryId } = req.body;
     const db = await connection();
     const collection = db.collection(collectionName);
 
@@ -160,6 +173,7 @@ export const updateTask = async (req, res, next) => {
     if (title) fields.title = title;
     if (description) fields.description = description;
     if (image) fields.image = image;
+    if (categoryId) fields.categoryId = categoryId;
 
     const result = await collection.updateOne(
       {

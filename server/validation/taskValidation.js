@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const createTaskSchema = z.object({
   title: z.string().trim().min(3, "Title must be at least 3 characters"),
-
+  categoryId: z.string().min(1, "Category is required"),
   description: z
     .string()
     .trim()
@@ -14,7 +14,7 @@ export const createTaskSchema = z.object({
 export const updateTaskSchema = z
   .object({
     _id: z.string().length(24, "Invalid Task ID"),
-
+    categoryId: z.string().min(1, "Category is required"),
     title: z
       .string()
       .trim()
@@ -29,10 +29,13 @@ export const updateTaskSchema = z
 
     image: z.string().url("Invalid image URL").optional(),
   })
-  .refine((data) => data.title || data.description || data.image, {
-    message: "At least one field is required to update",
-    path: ["title"],
-  });
+  .refine(
+    (data) => data.title || data.description || data.image || data.categoryId,
+    {
+      message: "At least one field is required to update",
+      path: ["title"],
+    },
+  );
 
 export const taskIdSchema = z.object({
   id: z.string().trim().length(24, "Invalid Task ID"),

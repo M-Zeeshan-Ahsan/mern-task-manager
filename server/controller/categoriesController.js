@@ -1,7 +1,8 @@
-import { success } from "zod";
+import { object, success } from "zod";
 import { connection } from "../dbconfig.js";
 import ApiError from "../middleware/ApiError.js";
 import { ObjectId } from "mongodb";
+import { collectionName } from "../dbconfig.js";
 
 const categoryCollectionName = "categories";
 
@@ -41,7 +42,7 @@ export const getCategory = async (req, res, next) => {
   try {
     const db = await connection();
     const collection = await db.collection(categoryCollectionName);
-    const result = await collection.find().toArray();
+    const result = await collection.find({ userId: req.user.id }).toArray();
     if (result) {
       return res.status(200).json({
         success: true,
@@ -57,18 +58,28 @@ export const getCategory = async (req, res, next) => {
 export const deleteCategory = async (req, res, next) => {
   try {
     const id = req.params.id;
+    if (!ObjectId.isValid(id)) {
+      throw new ApiError(400, "Invalid category id");
+    }
     const db = await connection();
     const collection = await db.collection(categoryCollectionName);
+    const taskCollection = db.collection(collectionName);
+    const taskExist = await taskCollection.findOne({
+      categoryId: new ObjectId(id),
+      userId: req.user.id,
+    });
+    if (taskExist) {
+      throw new ApiError(
+        400,
+        "Category is already used in tasks. Delete those tasks first.",
+      );
+    }
     const result = await collection.deleteOne({
       _id: new ObjectId(id),
       userId: req.user.id,
     });
     if (result.deletedCount === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Category not found",
-        data: null,
-      });
+      throw new ApiError(404, "Category not found");
     }
 
     return res.status(200).json({
