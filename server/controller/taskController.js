@@ -101,6 +101,16 @@ export const getTasks = async (req, res, next) => {
           },
         },
         {
+          $project: {
+            title: 1,
+            description: 1,
+            image: 1,
+            createdAt: 1,
+            "category._id": 1,
+            "category.name": 1,
+          },
+        },
+        {
           $sort: {
             createdAt: -1,
           },
