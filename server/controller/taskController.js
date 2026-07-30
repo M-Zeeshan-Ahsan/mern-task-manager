@@ -55,30 +55,32 @@ export const getTasks = async (req, res, next) => {
     }
     const search = req.query.search || "";
     const status = req.query.status || "";
+
     const filter = {
       userId: req.user.id,
-      $or: [
-        {
-          title: {
-            $regex: search,
-            $options: "i",
-          },
-        },
-        {
-          description: {
-            $regex: search,
-            $options: "i",
-          },
-        },
-      ],
+      // $or: [
+      //   {
+      //     title: {
+      //       $regex: search,
+      //       $options: "i",
+      //     },
+      //   },
+      //   {
+      //     description: {
+      //       $regex: search,
+      //       $options: "i",
+      //     },
+      //   },
+      // ],
     };
     if (status) {
       filter.status = status;
     }
+
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 5;
     const skip = (page - 1) * limit;
-    const totalTasks = await collection.countDocuments(filter);
+
     // const result = await collection
     //   .find(filter)
     //   .sort({ createdAt: -1 })
@@ -104,35 +106,74 @@ export const getTasks = async (req, res, next) => {
             preserveNullAndEmptyArrays: true,
           },
         },
+
         {
-          $project: {
-            title: 1,
-            description: 1,
-            image: 1,
-            createdAt: 1,
-            status: 1,
-            "category._id": 1,
-            "category.name": 1,
+          $match: {
+            $or: [
+              {
+                title: {
+                  $regex: search,
+                  $options: "i",
+                },
+              },
+              {
+                description: {
+                  $regex: search,
+                  $options: "i",
+                },
+              },
+              {
+                "category.name": {
+                  $regex: search,
+                  $options: "i",
+                },
+              },
+            ],
           },
         },
         {
-          $sort: {
-            createdAt: -1,
+          $facet: {
+            data: [
+              {
+                $project: {
+                  title: 1,
+                  description: 1,
+                  image: 1,
+                  createdAt: 1,
+                  status: 1,
+                  "category._id": 1,
+                  "category.name": 1,
+                },
+              },
+              {
+                $sort: {
+                  createdAt: -1,
+                },
+              },
+              {
+                $skip: skip,
+              },
+              {
+                $limit: limit,
+              },
+            ],
+            totalCount: [
+              {
+                $count: "totalTasks",
+              },
+            ],
           },
-        },
-        {
-          $skip: skip,
-        },
-        {
-          $limit: limit,
         },
       ])
       .toArray();
-
+    const tasks = result[0].data;
+    const totalTasks = result[0].totalCount[0]?.totalTasks || 0;
+    const totalPages = Math.ceil(totalTasks / limit);
+    console.log("result", result[0]);
     return res.status(200).json({
       success: true,
       message: "Tasks fetched successfully",
-      data: result,
+      data: tasks,
       pagination: {
         totalTasks,
         currentPage: page,
