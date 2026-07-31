@@ -162,6 +162,16 @@ export const getTasks = async (req, res, next) => {
                 $count: "totalTasks",
               },
             ],
+            statusSummary: [
+              {
+                $group: {
+                  _id: "$status",
+                  total: {
+                    $sum: 1,
+                  },
+                },
+              },
+            ],
           },
         },
       ])
@@ -169,11 +179,13 @@ export const getTasks = async (req, res, next) => {
     const tasks = result[0].data;
     const totalTasks = result[0].totalCount[0]?.totalTasks || 0;
     const totalPages = Math.ceil(totalTasks / limit);
+    const statusSummary = result[0].statusSummary;
     console.log("result", result[0]);
     return res.status(200).json({
       success: true,
       message: "Tasks fetched successfully",
       data: tasks,
+      statusSummary,
       pagination: {
         totalTasks,
         currentPage: page,

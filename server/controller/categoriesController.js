@@ -55,7 +55,7 @@ export const getCategory = async (req, res, next) => {
         },
         {
           $facet: {
-            data: [
+            categories: [
               {
                 $project: {
                   name: 1,
@@ -82,7 +82,7 @@ export const getCategory = async (req, res, next) => {
         },
       ])
       .toArray();
-    const categories = result[0].data;
+    const categories = result[0].categories;
     const totalCategories = result[0].totalCount[0]?.totalCategories || 0;
     const totalPages = Math.ceil(totalCategories / limit);
     return res.status(200).json({
